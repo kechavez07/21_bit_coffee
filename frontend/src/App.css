@@ -1,0 +1,36 @@
+.scaffold {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100svh;
+  padding: 24px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.scaffold .badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(
+    var(--coffee-bg) 0%,
+    var(--coffee-bg) 42%,
+    var(--coffee-band) 42%,
+    var(--coffee-band) 68%,
+    var(--coffee-bg) 68%,
+    var(--coffee-bg) 100%
+  );
+}
+
+.scaffold h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.scaffold p {
+  margin: 0;
+  opacity: 0.75;
+  max-width: 32ch;
+}
