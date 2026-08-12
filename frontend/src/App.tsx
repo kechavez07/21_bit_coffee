@@ -1,18 +1,46 @@
-import './App.css'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { Login } from './pages/Login'
+import { FinishSignIn } from './pages/FinishSignIn'
+import { CafeteriaPanel } from './pages/CafeteriaPanel'
+import { ProductionPanel } from './pages/ProductionPanel'
+import { ProtectedRoute } from './routes/ProtectedRoute'
+import { RootRedirect } from './routes/RootRedirect'
 
 /**
- * Placeholder root component.
+ * Phase 1: auth + role-gated routing.
  *
- * This is Phase 0 (project scaffolding only). Routing, the login screen,
- * and the Cafeteria/Production panels are built in later phases.
+ * `/login` and `/finish-signin` are public. `/cafeteria` and `/production`
+ * are placeholder panels (real screens land in Phase 2+) gated by
+ * `ProtectedRoute`, which requires a signed-in user with the matching
+ * role. `/` has no UI of its own — it resolves the signed-in user's role
+ * and redirects to their panel.
  */
 function App() {
   return (
-    <div className="scaffold">
-      <div className="badge" aria-hidden="true" />
-      <h1>21 Bit Coffee</h1>
-      <p>Frontend scaffold ready. Screens land in Phase 1+.</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/finish-signin" element={<FinishSignIn />} />
+        <Route
+          path="/cafeteria"
+          element={
+            <ProtectedRoute allowedRole="cafeteria">
+              <CafeteriaPanel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/production"
+          element={
+            <ProtectedRoute allowedRole="production">
+              <ProductionPanel />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
