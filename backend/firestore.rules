@@ -1,0 +1,42 @@
+rules_version = '2';
+
+// -----------------------------------------------------------------------
+// Phase 0 — Restrictive baseline.
+//
+// Default posture: deny everything. Per-role, per-collection rules for
+// products / variants / sales / merma / restock_requests are NOT defined
+// here yet — those land in later phases once roles and auth are wired up
+// (see PLAN.md Phase 1+). This file only exists so the project deploys
+// "secure by default" instead of wide open.
+//
+// The one exception: an authenticated user may read (not write) their
+// own `users/{uid}` doc, since Phase 1 (auth/roles) will need this to
+// resolve the caller's role immediately after login.
+//
+// -----------------------------------------------------------------------
+// Phase 1 — Auth & roles. Confirmed unchanged on purpose.
+//
+// `write: if false` on `users/{userId}` is intentional and stays that way
+// for this phase: role assignment is a manual/admin action (Firebase
+// Console or a seed script — see backend/README.md), never something the
+// authenticated client can do to itself. If a client could write its own
+// `users/{uid}` doc, it could self-assign `role: "production"` and reach
+// catalog-management/CRUD permissions in later phases. Re-evaluate this
+// only if/when an admin-only Cloud Function is introduced to provision
+// users (out of scope for Phase 1).
+// -----------------------------------------------------------------------
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Deny-all fallback for every other collection until Phase 1+ rules
+    // are written.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
