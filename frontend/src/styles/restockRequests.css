@@ -1,0 +1,258 @@
+/**
+ * Phase 5 — restock-request flow (cafetería "Pedidos" tab, producción's
+ * whole panel). `forms.css`/`catalog.css` still own inputs/buttons/badges/
+ * the `.catalog-panel` form shell — this file adds the list/table/comment
+ * scaffolding specific to this flow.
+ */
+
+.restock-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.restock-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.restock-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.restock-list-item {
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.restock-list-item-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.restock-list-item-title {
+  font-weight: 600;
+}
+
+.restock-list-item-meta {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.restock-list-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---- Detail ---- */
+
+.restock-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.restock-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.restock-detail-meta {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.restock-rejection-reason {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #b3261e 12%, transparent);
+  font-size: 14px;
+}
+
+.restock-detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.restock-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.restock-items-table th,
+.restock-items-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.restock-items-table th {
+  font-size: 12px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Status badges ---- */
+
+.badge-status-pending {
+  background: #a76d1a;
+  color: #fff;
+}
+
+.badge-status-queued {
+  background: #1565c0;
+  color: #fff;
+}
+
+.badge-status-rejected {
+  background: #b3261e;
+  color: #fff;
+}
+
+.badge-status-dispatched {
+  background: #6a1b9a;
+  color: #fff;
+}
+
+.badge-status-received {
+  background: #2e7d32;
+  color: #fff;
+}
+
+/* ---- Comments ---- */
+
+.restock-comments h4 {
+  margin: 0 0 8px;
+}
+
+.restock-comments-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.restock-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  font-size: 14px;
+}
+
+.restock-comment-author {
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.restock-comment-meta {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.restock-comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 480px;
+}
+
+/* ---- Item picker (RequestItemsForm) ---- */
+
+.restock-item-picker {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.restock-item-picker .field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.restock-item-picker .field-quantity {
+  flex: 0 0 100px;
+  min-width: 100px;
+}
+
+.restock-draft-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.restock-draft-table th,
+.restock-draft-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+/* ---- Dispatch form ---- */
+
+.dispatch-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.dispatch-item-info {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dispatch-item-info-requested {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.dispatch-item-qty {
+  width: 90px;
+}
+
+.dispatch-item-note {
+  flex: 1;
+  min-width: 180px;
+}

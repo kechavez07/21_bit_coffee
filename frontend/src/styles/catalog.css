@@ -1,0 +1,302 @@
+/**
+ * Layout for the Cafetería panel shell (top bar + tab nav) and the
+ * Phase 3 catalog/dashboard screens. `forms.css` still owns every input
+ * control and button — this file is only the list/card/grid scaffolding
+ * that didn't exist before this phase.
+ */
+
+.panel-shell {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.panel-brand {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--coffee-bg);
+}
+
+.panel-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-nav {
+  margin: 12px 20px 0;
+  max-width: 360px;
+}
+
+.panel-nav .tab {
+  text-decoration: none;
+  text-align: center;
+  color: inherit;
+}
+
+.panel-nav .tab-active {
+  background: var(--bg);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.panel-content {
+  flex: 1;
+  padding: 20px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ---- Dashboard ---- */
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dashboard-card {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--coffee-band) 20%, transparent);
+}
+
+.dashboard-card-warning {
+  background: color-mix(in srgb, #b3261e 15%, transparent);
+}
+
+.dashboard-card-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.dashboard-card-label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.low-stock-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.low-stock-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.low-stock-count {
+  font-weight: 600;
+}
+
+/* ---- Catalog ---- */
+
+.catalog-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.catalog-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.catalog-category h2 {
+  font-size: 18px;
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--coffee-band);
+}
+
+.catalog-empty {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.catalog-empty-variants {
+  margin: 8px 0;
+}
+
+.catalog-product-list {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.catalog-product {
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.catalog-product-inactive {
+  opacity: 0.6;
+}
+
+.catalog-product-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catalog-product-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.catalog-product-actions,
+.catalog-variant-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.catalog-variant-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.catalog-variant {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.catalog-variant-low {
+  background: color-mix(in srgb, #b3261e 12%, transparent);
+}
+
+.catalog-variant-inactive {
+  opacity: 0.55;
+}
+
+.catalog-variant-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.catalog-variant-flavor {
+  font-weight: 600;
+}
+
+.catalog-variant-min {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.catalog-stock-adjust {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.catalog-stock-adjust input {
+  width: 70px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.catalog-panel {
+  border: 1px dashed var(--coffee-band);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: color-mix(in srgb, var(--coffee-band) 8%, transparent);
+}
+
+.catalog-panel h3,
+.catalog-panel h4 {
+  margin: 0;
+}
+
+.catalog-panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-inactive {
+  background: color-mix(in srgb, var(--text) 15%, transparent);
+  color: var(--text);
+}
+
+.badge-low {
+  background: #b3261e;
+  color: #fff;
+}

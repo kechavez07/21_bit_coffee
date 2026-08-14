@@ -16,9 +16,15 @@
  * user authenticated successfully but has not been provisioned yet — the
  * frontend should treat that as "contact an admin", not as an error to retry.
  *
- * This module owns *auth* concerns only. It does not build UI, does not
- * decide routing/redirects, and does not manage FCM tokens (that lands in
- * Phase 5, alongside its own service).
+ * This module owns *auth* concerns only. It does not build UI and does not
+ * decide routing/redirects. It DOES own writing the FCM token to
+ * `users/{uid}` (`saveFcmToken`, Phase 6) — same rationale as
+ * `getUserRole`, both touch that same document, and keeping every write to
+ * it in one place makes it easy to eyeball against the Firestore rule that
+ * constrains it (see `backend/firestore.rules`, `match /users/{userId}`).
+ * *Obtaining* the token (permission prompt, service worker registration,
+ * `getToken()`) is a messaging concern and lives in `./messaging.ts`
+ * instead.
  */
 import {
   isSignInWithEmailLink,
@@ -31,7 +37,7 @@ import {
   type UserCredential,
   type Unsubscribe,
 } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { auth, db } from './config'
 
 /** localStorage key used to round-trip the email across the email-link flow. */
@@ -134,4 +140,20 @@ export async function getUserRole(uid: string): Promise<UserRole | null> {
  */
 export function signOutUser(): Promise<void> {
   return signOut(auth)
+}
+
+/**
+ * Saves an FCM device token to `users/{uid}`.
+ *
+ * The payload is EXACTLY `{fcmToken, fcmTokenUpdatedAt}` — the only diff
+ * the `users/{userId}` Firestore rule allows a signed-in user to write to
+ * their own doc (`request.resource.data.diff(resource.data).affectedKeys()
+ * .hasOnly(['fcmToken', 'fcmTokenUpdatedAt'])`). Adding any other field
+ * here would make every call rejected by the rule, not just this one.
+ */
+export function saveFcmToken(uid: string, token: string): Promise<void> {
+  return updateDoc(doc(db, 'users', uid), {
+    fcmToken: token,
+    fcmTokenUpdatedAt: serverTimestamp(),
+  })
 }
