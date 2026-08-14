@@ -69,16 +69,21 @@
   opacity: 0.85;
 }
 
-.field input {
+.field input,
+.field select,
+.field textarea {
   font: inherit;
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
   background: var(--bg);
   color: var(--text);
+  resize: vertical;
 }
 
-.field input:focus-visible {
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
   outline: 2px solid var(--coffee-bg);
   outline-offset: 1px;
 }
@@ -106,6 +111,11 @@
   background: transparent;
   color: var(--text);
   border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
+}
+
+.btn-small {
+  padding: 6px 10px;
+  font-size: 13px;
 }
 
 .form-error {
