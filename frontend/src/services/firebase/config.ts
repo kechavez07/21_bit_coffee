@@ -12,6 +12,13 @@
  * below match `backend/firebase.json`. Off by default — omitting the flag
  * (or setting it to anything other than `'true'`) keeps the previous
  * behavior unchanged.
+ *
+ * Firestore emulator port is 8090, not the Firebase CLI default of 8080 —
+ * on this machine 8080 is permanently held by a Windows system service
+ * (`iphlpsvc`, hosted under `svchost.exe`), confirmed via `netstat -ano`.
+ * That's not a leftover emulator process to kill; moving the emulator off
+ * 8080 is the stable fix. Keep this in sync with `backend/firebase.json`'s
+ * `emulators.firestore.port` if either changes.
  */
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth'
@@ -58,7 +65,7 @@ export const functions: Functions = getFunctions(app)
 
 if (useEmulator) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
-  connectFirestoreEmulator(db, '127.0.0.1', 8080)
+  connectFirestoreEmulator(db, '127.0.0.1', 8090)
   connectFunctionsEmulator(functions, '127.0.0.1', 5001)
 
   // eslint-disable-next-line no-console
