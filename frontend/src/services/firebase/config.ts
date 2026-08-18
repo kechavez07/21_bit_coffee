@@ -6,12 +6,17 @@
  * expected keys and copy it to `.env` (gitignored) with real values.
  *
  * Emulator opt-in (Phase 3): when `VITE_USE_FIREBASE_EMULATOR === 'true'`,
- * Auth/Firestore/Functions are pointed at the local Firebase emulator
- * suite instead of the real `bit-coffee-668f6` project, so the catalog
- * screens can be exercised end to end without writing to production. Ports
- * below match `backend/firebase.json`. Off by default — omitting the flag
- * (or setting it to anything other than `'true'`) keeps the previous
- * behavior unchanged.
+ * Auth/Firestore are pointed at the local Firebase emulator suite instead
+ * of the real `bit-coffee-668f6` project, so the catalog screens can be
+ * exercised end to end without writing to production. Ports below match
+ * `backend/firebase.json`. Off by default — omitting the flag (or setting
+ * it to anything other than `'true'`) keeps the previous behavior
+ * unchanged.
+ *
+ * There is no Functions SDK here — `restock_requests` mutations go through
+ * the Express server (`VITE_API_URL`, see
+ * `services/firebase/restockRequests.ts`) instead of Cloud Functions
+ * callables, since the project migrated off Blaze-only Cloud Functions.
  *
  * Firestore emulator port is 8090, not the Firebase CLI default of 8080 —
  * on this machine 8080 is permanently held by a Windows system service
@@ -27,7 +32,6 @@ import {
   getFirestore,
   type Firestore,
 } from 'firebase/firestore'
-import { connectFunctionsEmulator, getFunctions, type Functions } from 'firebase/functions'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -61,12 +65,10 @@ export const app: FirebaseApp = initializeApp(
 )
 export const auth: Auth = getAuth(app)
 export const db: Firestore = getFirestore(app)
-export const functions: Functions = getFunctions(app)
 
 if (useEmulator) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
   connectFirestoreEmulator(db, '127.0.0.1', 8090)
-  connectFunctionsEmulator(functions, '127.0.0.1', 5001)
 
   // eslint-disable-next-line no-console
   console.info('[firebase] Using local emulator suite (VITE_USE_FIREBASE_EMULATOR=true).')

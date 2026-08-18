@@ -1,14 +1,15 @@
 /**
- * Phase 5 — restock-request flow (cafetería "Pedidos" tab, producción's
- * whole panel). `forms.css`/`catalog.css` still own inputs/buttons/badges/
- * the `.catalog-panel` form shell — this file adds the list/table/comment
- * scaffolding specific to this flow.
+ * Restock-request flow (cafetería "Pedidos" tab, producción's whole
+ * panel). `forms.css`/`catalog.css` still own inputs/buttons/the badge
+ * base/the `.catalog-panel` form shell — this file adds the list/table/
+ * comment scaffolding specific to this flow, plus the 5-status badge
+ * system below.
  */
 
 .restock-page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .restock-toolbar {
@@ -16,7 +17,7 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .restock-list {
@@ -25,16 +26,16 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .restock-list-item {
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  border-radius: 12px;
-  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .restock-list-item-summary {
@@ -42,7 +43,7 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-2);
   width: 100%;
   background: transparent;
   border: none;
@@ -54,18 +55,20 @@
 }
 
 .restock-list-item-title {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
 }
 
 .restock-list-item-meta {
-  opacity: 0.7;
-  font-size: 13px;
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
 }
 
 .restock-list-item-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 /* ---- Detail ---- */
@@ -73,122 +76,176 @@
 .restock-detail {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .restock-detail-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
 .restock-detail-meta {
-  opacity: 0.7;
-  font-size: 13px;
+  color: var(--color-ink-secondary);
+  font-size: var(--text-xs);
 }
 
 .restock-rejection-reason {
   margin: 0;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, #b3261e 12%, transparent);
-  font-size: 14px;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-ink);
+  font-size: var(--text-sm);
 }
 
 .restock-detail-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
-.restock-items-table {
+.restock-items-table,
+.restock-draft-table {
+  display: block;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 .restock-items-table th,
-.restock-items-table td {
+.restock-items-table td,
+.restock-draft-table th,
+.restock-draft-table td {
   text-align: left;
-  padding: 6px 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  padding: var(--space-2) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.restock-items-table th {
-  font-size: 12px;
-  opacity: 0.7;
+.restock-items-table td,
+.restock-draft-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.restock-items-table th,
+.restock-draft-table th {
+  font-size: var(--text-2xs);
+  color: var(--color-ink-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  font-weight: var(--weight-semibold);
 }
 
-/* ---- Status badges ---- */
+/* ---- Status badges ----
+ *
+ * Restrained by design: one hue family (blue) marks "in progress", plus
+ * neutral for "not started", solid ink for "done", and a single soft
+ * danger tone reserved for the one terminal-negative status. No rainbow.
+ * A small dot (::before) adds a scannable shape cue independent of color.
+ */
+
+.badge-status-pending,
+.badge-status-queued,
+.badge-status-dispatched,
+.badge-status-received,
+.badge-status-rejected {
+  gap: var(--space-1);
+}
+
+.badge-status-pending::before,
+.badge-status-queued::before,
+.badge-status-dispatched::before,
+.badge-status-received::before,
+.badge-status-rejected::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
 
 .badge-status-pending {
-  background: #a76d1a;
-  color: #fff;
+  background: var(--color-surface-hover);
+  color: var(--color-ink-secondary);
 }
 
 .badge-status-queued {
-  background: #1565c0;
-  color: #fff;
-}
-
-.badge-status-rejected {
-  background: #b3261e;
-  color: #fff;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
 }
 
 .badge-status-dispatched {
-  background: #6a1b9a;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-ink-on-accent);
 }
 
 .badge-status-received {
-  background: #2e7d32;
-  color: #fff;
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+
+.badge-status-rejected {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-ink);
 }
 
 /* ---- Comments ---- */
 
+.restock-comments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .restock-comments h4 {
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .restock-comments-list {
   list-style: none;
-  margin: 0 0 10px;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .restock-comment {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--text) 4%, transparent);
-  font-size: 14px;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
 }
 
 .restock-comment-author {
-  font-weight: 600;
-  font-size: 12px;
-  opacity: 0.85;
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-2xs);
+  color: var(--color-ink-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.restock-comment-text {
+  color: var(--color-ink);
 }
 
 .restock-comment-meta {
-  opacity: 0.6;
-  font-size: 12px;
+  color: var(--color-ink-tertiary);
+  font-size: var(--text-2xs);
 }
 
 .restock-comment-form {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
   max-width: 480px;
 }
 
@@ -197,7 +254,7 @@
 .restock-item-picker {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -211,28 +268,15 @@
   min-width: 100px;
 }
 
-.restock-draft-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.restock-draft-table th,
-.restock-draft-table td {
-  text-align: left;
-  padding: 6px 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-}
-
 /* ---- Dispatch form ---- */
 
 .dispatch-item-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-3);
   flex-wrap: wrap;
-  padding: 8px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .dispatch-item-info {
@@ -244,8 +288,8 @@
 }
 
 .dispatch-item-info-requested {
-  opacity: 0.7;
-  font-size: 13px;
+  color: var(--color-ink-secondary);
+  font-size: var(--text-xs);
 }
 
 .dispatch-item-qty {

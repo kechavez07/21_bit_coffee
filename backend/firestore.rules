@@ -25,16 +25,211 @@ rules_version = '2';
 // only if/when an admin-only Cloud Function is introduced to provision
 // users (out of scope for Phase 1).
 // -----------------------------------------------------------------------
+// Catalog + restock requests (this pass).
+//
+// Scope, explicit: `products`, `variants`, `restock_requests` and its
+// `comments` subcollection. Deliberately NOT touched here: `users/{uid}`
+// (stays as-is above) and `sales`/`merma`, which still fall through to the
+// deny-all fallback below — those two collections are written by the
+// CLIENT SDK inside a `runTransaction` (see `movements.ts`), so they stay
+// broken until their own rules pass lands (audit finding H-02, tracked
+// separately). Don't "fix" that by adding sales/merma rules here as a
+// side effect — it's explicitly out of scope for this pass.
+//
+// Ownership (see PLAN.md / backend-firebase.md — corrected, was inverted
+// in earlier docs): Cafetería writes the whole catalog. Pastelería
+// (`role == "production"`) is read-only on `products`/`variants`.
+// -----------------------------------------------------------------------
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isCafeteria() {
+      return isSignedIn() && callerRole() == 'cafeteria';
+    }
+
+    function isProduction() {
+      return isSignedIn() && callerRole() == 'production';
+    }
 
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;
     }
 
-    // Deny-all fallback for every other collection until Phase 1+ rules
-    // are written.
+    // ---- products ---------------------------------------------------------
+
+    function isValidProductCreate() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['name', 'description', 'category', 'active', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'])
+        && d.name is string && d.name.size() > 0
+        && (d.description == null || d.description is string)
+        && d.category in ['galletas', 'panaderia', 'reposteria']
+        && d.active == true
+        && d.createdBy == request.auth.uid
+        && d.updatedBy == request.auth.uid;
+    }
+
+    function isValidProductUpdate() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['name', 'description', 'category', 'active', 'updatedAt', 'updatedBy'])
+        && d.createdAt == r.createdAt && d.createdBy == r.createdBy
+        && d.name is string && d.name.size() > 0
+        && (d.description == null || d.description is string)
+        && d.category in ['galletas', 'panaderia', 'reposteria']
+        && d.active is bool
+        && d.updatedBy == request.auth.uid;
+    }
+
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create: if isCafeteria() && isValidProductCreate();
+      allow update: if isCafeteria() && isValidProductUpdate();
+      // No hard delete — `active: false` via update is the only "remove"
+      // path (products/variants are referenced by sales/merma/restock_requests).
+      allow delete: if false;
+    }
+
+    // ---- variants -----------------------------------------------------------
+    //
+    // Catalog-field edits and stock corrections are two mutually exclusive
+    // writes, matching `services/firebase/catalog.ts`'s comment exactly:
+    // `updateVariantCatalogFields` never touches `stock`; `adjustVariantStock`
+    // (and the stock decrement inside `registerSale`/`registerWaste`'s
+    // transaction) sends ONLY `stock` + audit fields. A single write can
+    // never do both. (The Admin-SDK increment inside `confirmReceipt`
+    // bypasses these rules entirely, same as always with Admin SDK.)
+
+    function isValidVariantCreate() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['productId', 'flavor', 'stock', 'minStockAlert', 'active', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'])
+        && d.productId is string
+        && exists(/databases/$(database)/documents/products/$(d.productId))
+        && (d.flavor == null || d.flavor is string)
+        && d.stock is int && d.stock >= 0
+        && d.minStockAlert is int && d.minStockAlert >= 0
+        && d.active == true
+        && d.createdBy == request.auth.uid
+        && d.updatedBy == request.auth.uid;
+    }
+
+    function isCatalogFieldUpdate() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['flavor', 'minStockAlert', 'active', 'updatedAt', 'updatedBy'])
+        && d.stock == r.stock
+        && (d.flavor == null || d.flavor is string)
+        && d.minStockAlert is int && d.minStockAlert >= 0
+        && d.active is bool
+        && d.updatedBy == request.auth.uid;
+    }
+
+    function isStockOnlyUpdate() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['stock', 'updatedAt', 'updatedBy'])
+        && d.stock is int && d.stock >= 0
+        && d.updatedBy == request.auth.uid;
+    }
+
+    match /variants/{variantId} {
+      allow read: if isSignedIn();
+      allow create: if isCafeteria() && isValidVariantCreate();
+      allow update: if isCafeteria() && (isCatalogFieldUpdate() || isStockOnlyUpdate());
+      allow delete: if false;
+    }
+
+    // ---- restock_requests -----------------------------------------------------
+    //
+    // Every legitimate write to the ROOT document goes through one of the 6
+    // Cloud Functions callables in `backend/functions/lib/restockRequests.js`,
+    // which use the Admin SDK — Admin SDK writes always bypass Firestore
+    // rules, in the emulator exactly like in production. So nothing below
+    // actually gates those 6 callables; it CAN'T, from rules. What it does
+    // gate is a hypothetical future direct client write to this collection —
+    // this block mirrors the same state machine so that path, if anyone ever
+    // adds it, doesn't silently skip the rules the Functions already
+    // enforce. Treat this as documentation-as-code / second barrier, not
+    // the primary enforcement — see `lib/validation.js` for that.
+
+    function isValidRestockRequestCreate() {
+      let d = request.resource.data;
+      return d.status == 'pending'
+        && d.requestedBy == request.auth.uid
+        && d.items is list && d.items.size() > 0;
+    }
+
+    function isValidAccept() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return r.status == 'pending' && d.status == 'queued'
+        && d.acceptedBy == request.auth.uid;
+    }
+
+    function isValidReject() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return r.status == 'pending' && d.status == 'rejected'
+        && d.rejectedBy == request.auth.uid
+        && d.rejectionReason is string && d.rejectionReason.size() > 0;
+    }
+
+    function isValidDispatch() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return r.status == 'queued' && d.status == 'dispatched'
+        && d.dispatchedBy == request.auth.uid;
+    }
+
+    function isValidEdit() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return r.status == 'pending' && d.status == 'pending'
+        && r.requestedBy == request.auth.uid
+        && d.requestedBy == r.requestedBy;
+    }
+
+    function isValidConfirmReceipt() {
+      let d = request.resource.data;
+      let r = resource.data;
+      return r.status == 'dispatched' && d.status == 'received'
+        && r.requestedBy == request.auth.uid
+        && d.receivedBy == request.auth.uid;
+    }
+
+    match /restock_requests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isCafeteria() && isValidRestockRequestCreate();
+      allow update: if (isCafeteria() && (isValidEdit() || isValidConfirmReceipt()))
+        || (isProduction() && (isValidAccept() || isValidReject() || isValidDispatch()));
+      allow delete: if false;
+
+      // Plain client writes (not through a callable) — the one part of
+      // this workflow the client genuinely does write directly, per
+      // `services/firebase/restockRequests.ts`'s `addComment`.
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn()
+          && request.resource.data.keys().hasOnly(['authorUid', 'authorRole', 'text', 'createdAt'])
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.authorRole == callerRole()
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+        allow update, delete: if false;
+      }
+    }
+
+    // Deny-all fallback for every other collection. Still covers
+    // `sales`/`merma` — deliberately out of scope for this pass, see H-02.
     match /{document=**} {
       allow read, write: if false;
     }
