@@ -144,6 +144,7 @@ export function RequestItemsForm({
             step={1}
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
+            onWheel={(e) => e.currentTarget.blur()}
           />
         </div>
 

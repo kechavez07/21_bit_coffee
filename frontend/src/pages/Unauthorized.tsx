@@ -26,6 +26,7 @@ export function Unauthorized() {
           Cerrar sesión
         </button>
       }
+      showBrand
     />
   )
 }

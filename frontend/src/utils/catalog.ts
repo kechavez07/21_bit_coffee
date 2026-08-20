@@ -63,3 +63,17 @@ export function groupCatalogByCategory(
 export function isLowStock(variant: Variant): boolean {
   return variant.stock <= variant.minStockAlert
 }
+
+/**
+ * Lowercases and strips accents so search/filter matching doesn't care
+ * whether the user typed "café" or "cafe". Used by the catalog search box
+ * and the Movimientos variant combobox — kept here rather than duplicated
+ * per screen.
+ */
+export function normalizeForSearch(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+}

@@ -1,8 +1,6 @@
 /**
- * Maps Firebase Auth error codes to user-facing Spanish messages.
- *
- * Shared between the password and email-link flows (`Login`,
- * `FinishSignIn`) so error copy stays consistent in one place.
+ * Maps Firebase Auth error codes to user-facing Spanish messages for the
+ * password sign-in flow (`Login`).
  */
 
 interface FirebaseAuthErrorLike {
@@ -32,8 +30,6 @@ const MESSAGES: Record<string, string> = {
   'auth/too-many-requests':
     'Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.',
   'auth/network-request-failed': 'Error de red. Verifica tu conexión e intenta de nuevo.',
-  'auth/expired-action-code': 'El enlace expiró. Solicita uno nuevo desde la pantalla de inicio de sesión.',
-  'auth/invalid-action-code': 'El enlace no es válido o ya fue usado. Solicita uno nuevo.',
   'auth/user-token-expired': 'Tu sesión expiró. Vuelve a iniciar sesión.',
 }
 

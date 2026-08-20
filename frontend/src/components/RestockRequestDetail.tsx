@@ -19,6 +19,7 @@ import { useComments } from '../hooks/useComments'
 import { addComment, type RestockRequest } from '../services/firebase/restockRequests'
 import type { UserRole } from '../services/firebase/auth'
 import { ROLE_LABELS, STATUS_LABELS } from '../utils/restockRequests'
+import { useToast } from '../hooks/useToast'
 import '../styles/restockRequests.css'
 
 export interface RestockRequestDetailProps {
@@ -29,6 +30,7 @@ export interface RestockRequestDetailProps {
 }
 
 export function RestockRequestDetail({ request, role, uid, actions }: RestockRequestDetailProps) {
+  const { showToast } = useToast()
   const { comments, loading: commentsLoading, error: commentsError } = useComments(request.id)
   const [commentText, setCommentText] = useState('')
   const [submittingComment, setSubmittingComment] = useState(false)
@@ -46,6 +48,7 @@ export function RestockRequestDetail({ request, role, uid, actions }: RestockReq
     try {
       await addComment(request.id, trimmed, uid, role)
       setCommentText('')
+      showToast('success', 'Comentario agregado.')
     } catch (err) {
       setCommentError(err instanceof Error ? err.message : 'No se pudo enviar el comentario.')
     } finally {
@@ -64,28 +67,30 @@ export function RestockRequestDetail({ request, role, uid, actions }: RestockReq
         <p className="restock-rejection-reason">Motivo del rechazo: {request.rejectionReason}</p>
       )}
 
-      <table className="restock-items-table">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Sabor</th>
-            <th>Pedido</th>
-            {showDispatchColumns && <th>Despachado</th>}
-            {showDispatchColumns && <th>Nota</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {request.items.map((item) => (
-            <tr key={item.variantId}>
-              <td>{item.productName}</td>
-              <td>{item.flavor ?? '—'}</td>
-              <td>{item.requestedQty}</td>
-              {showDispatchColumns && <td>{item.dispatchedQty ?? '—'}</td>}
-              {showDispatchColumns && <td>{item.dispatchNote ?? '—'}</td>}
+      <div className="restock-table-wrap card">
+        <table className="restock-items-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Sabor</th>
+              <th>Pedido</th>
+              {showDispatchColumns && <th>Despachado</th>}
+              {showDispatchColumns && <th>Nota</th>}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {request.items.map((item) => (
+              <tr key={item.variantId}>
+                <td>{item.productName}</td>
+                <td>{item.flavor ?? '—'}</td>
+                <td>{item.requestedQty}</td>
+                {showDispatchColumns && <td>{item.dispatchedQty ?? '—'}</td>}
+                {showDispatchColumns && <td>{item.dispatchNote ?? '—'}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {actions && <div className="restock-detail-actions">{actions}</div>}
 

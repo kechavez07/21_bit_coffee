@@ -1,9 +1,11 @@
 /**
  * Authentication service.
  *
- * Wraps Firebase Auth for the two supported sign-in methods (Phase 1):
- *   1. Email/password — `signInWithPassword`.
- *   2. Email link / passwordless — `sendEmailLink` + `completeEmailLinkSignIn`.
+ * Wraps Firebase Auth for the one supported sign-in method — email/password
+ * (`signInWithPassword`). The email-link/passwordless flow that used to
+ * live here (`sendEmailLink`/`isEmailLinkSignIn`/`completeEmailLinkSignIn`,
+ * plus the `/finish-signin` page that completed it) was removed; password
+ * is the only path now.
  *
  * Also exposes `getUserRole`, which resolves the caller's role from the
  * `users/{uid}` Firestore doc (see `backend/firestore.rules`: a signed-in
@@ -27,11 +29,8 @@
  * instead.
  */
 import {
-  isSignInWithEmailLink,
   onAuthStateChanged,
-  sendSignInLinkToEmail,
   signInWithEmailAndPassword,
-  signInWithEmailLink,
   signOut,
   type User,
   type UserCredential,
@@ -39,9 +38,6 @@ import {
 } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { auth, db } from './config'
-
-/** localStorage key used to round-trip the email across the email-link flow. */
-const EMAIL_FOR_SIGN_IN_KEY = 'emailForSignIn'
 
 export type UserRole = 'cafeteria' | 'production'
 
@@ -53,60 +49,6 @@ export function signInWithPassword(
   password: string,
 ): Promise<UserCredential> {
   return signInWithEmailAndPassword(auth, email, password)
-}
-
-/**
- * Sends a passwordless sign-in link to `email`.
- *
- * The link always points back at `/finish-signin` on the current origin,
- * with `handleCodeInApp: true` so Firebase hands control back to the app
- * instead of showing its own landing page. On success, the email is cached
- * in localStorage so `completeEmailLinkSignIn` can complete the flow
- * without asking the user to retype it (same-device case).
- */
-export async function sendEmailLink(email: string): Promise<void> {
-  const actionCodeSettings = {
-    url: `${window.location.origin}/finish-signin`,
-    handleCodeInApp: true,
-  }
-
-  await sendSignInLinkToEmail(auth, email, actionCodeSettings)
-  window.localStorage.setItem(EMAIL_FOR_SIGN_IN_KEY, email)
-}
-
-/**
- * Wrapper of `isSignInWithEmailLink` — lets the frontend detect whether a
- * given URL (typically `window.location.href`) is a valid email sign-in
- * link before attempting to complete the flow.
- */
-export function isEmailLinkSignIn(url: string): boolean {
-  return isSignInWithEmailLink(auth, url)
-}
-
-/**
- * Completes a passwordless sign-in started by `sendEmailLink`.
- *
- * - If `email` is omitted, it's read from localStorage (`emailForSignIn`).
- * - If it's not there either (the user opened the link on a different
- *   device than the one that requested it), this throws an Error whose
- *   `message` is exactly `'EMAIL_REQUIRED'` so the frontend can catch it
- *   and prompt the user to re-enter their email.
- * - On success, the cached email is cleared from localStorage.
- */
-export async function completeEmailLinkSignIn(
-  url: string,
-  email?: string,
-): Promise<UserCredential> {
-  const resolvedEmail =
-    email ?? window.localStorage.getItem(EMAIL_FOR_SIGN_IN_KEY)
-
-  if (!resolvedEmail) {
-    throw new Error('EMAIL_REQUIRED')
-  }
-
-  const credential = await signInWithEmailLink(auth, resolvedEmail, url)
-  window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY)
-  return credential
 }
 
 /**

@@ -1,10 +1,10 @@
 /**
  * Restock-requests service — `restock_requests` (root doc, read-only for
- * clients — every mutation is one of the six callables below) and its
+ * clients — every mutation is one of the six routes below) and its
  * `comments` subcollection (plain client writes, allowed by
  * `backend/firestore.rules`).
  *
- * See `backend/functions/lib/restockRequests.js` for the state machine this
+ * See `backend/server/src/lib/restockRequests.js` for the state machine this
  * module drives:
  *
  *   pending --accept--> queued --dispatch--> dispatched --confirmReceipt--> received
@@ -12,11 +12,14 @@
  *      +--edit (cafetería, while still pending)
  *      +--reject (pastelería) --> rejected  [terminal]
  *
- * The six callable wrappers below deliberately do NOT map `FunctionsError`
- * to a friendlier message the way `mapFirestoreError` does for Firestore
- * write failures — the backend's `HttpsError`s already carry a Spanish
- * message meant to be shown to the user as-is (see
- * `backend/functions/lib/validation.js`). Callers just read `error.message`.
+ * The six routes used to be Cloud Functions callables (`httpsCallable`);
+ * they're now plain HTTP POSTs to the Express server at `VITE_API_URL`
+ * (see `README_MIGRACION.md`). `callApi` below deliberately does NOT map
+ * the response to a friendlier message the way `mapFirestoreError` does for
+ * Firestore write failures — the server's error responses already carry a
+ * Spanish message meant to be shown to the user as-is (see
+ * `backend/server/src/lib/validation.js`). Callers just read `error.message`,
+ * same as before with `FunctionsError`.
  */
 import {
   addDoc,
@@ -28,8 +31,8 @@ import {
   type FirestoreError,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { httpsCallable } from 'firebase/functions'
-import { db, functions } from './config'
+import { db } from './config'
+import { callApi } from './apiClient'
 import type { UserRole } from './auth'
 
 const REQUESTS_COLLECTION = 'restock_requests'
@@ -151,12 +154,7 @@ export interface DispatchItemInput {
 
 /** cafetería only. Creates a new `pending` request. */
 export async function createRestockRequest(items: RequestedItemInput[]): Promise<{ id: string }> {
-  const callable = httpsCallable<{ items: RequestedItemInput[] }, { id: string }>(
-    functions,
-    'createRestockRequest',
-  )
-  const result = await callable({ items })
-  return result.data
+  return callApi<{ id: string }>('createRestockRequest', { items })
 }
 
 /** cafetería only. Precondition: status == 'pending'. */
@@ -164,22 +162,12 @@ export async function editPendingRequest(
   requestId: string,
   items: RequestedItemInput[],
 ): Promise<{ id: string }> {
-  const callable = httpsCallable<
-    { requestId: string; items: RequestedItemInput[] },
-    { id: string }
-  >(functions, 'editPendingRequest')
-  const result = await callable({ requestId, items })
-  return result.data
+  return callApi<{ id: string }>('editPendingRequest', { requestId, items })
 }
 
 /** producción only. Precondition: status == 'pending'. */
 export async function acceptRestockRequest(requestId: string): Promise<{ id: string }> {
-  const callable = httpsCallable<{ requestId: string }, { id: string }>(
-    functions,
-    'acceptRestockRequest',
-  )
-  const result = await callable({ requestId })
-  return result.data
+  return callApi<{ id: string }>('acceptRestockRequest', { requestId })
 }
 
 /** producción only. Precondition: status == 'pending'. `reason` must be non-empty. */
@@ -187,12 +175,7 @@ export async function rejectRestockRequest(
   requestId: string,
   reason: string,
 ): Promise<{ id: string }> {
-  const callable = httpsCallable<{ requestId: string; reason: string }, { id: string }>(
-    functions,
-    'rejectRestockRequest',
-  )
-  const result = await callable({ requestId, reason })
-  return result.data
+  return callApi<{ id: string }>('rejectRestockRequest', { requestId, reason })
 }
 
 /**
@@ -204,20 +187,10 @@ export async function dispatchRestockRequest(
   requestId: string,
   items: DispatchItemInput[],
 ): Promise<{ id: string }> {
-  const callable = httpsCallable<
-    { requestId: string; items: DispatchItemInput[] },
-    { id: string }
-  >(functions, 'dispatchRestockRequest')
-  const result = await callable({ requestId, items })
-  return result.data
+  return callApi<{ id: string }>('dispatchRestockRequest', { requestId, items })
 }
 
 /** cafetería only. Precondition: status == 'dispatched'. Increments `variants.stock` server-side. */
 export async function confirmReceipt(requestId: string): Promise<{ id: string }> {
-  const callable = httpsCallable<{ requestId: string }, { id: string }>(
-    functions,
-    'confirmReceipt',
-  )
-  const result = await callable({ requestId })
-  return result.data
+  return callApi<{ id: string }>('confirmReceipt', { requestId })
 }

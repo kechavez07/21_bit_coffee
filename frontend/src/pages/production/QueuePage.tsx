@@ -69,14 +69,20 @@ export function QueuePage() {
 
   return (
     <div className="restock-page">
-      <h2>Cola de despacho</h2>
+      <div className="page-header">
+        <div className="page-header-text">
+          <p className="eyebrow">Producción</p>
+          <h1>Cola de despacho</h1>
+          <p>Pedidos aceptados, listos para preparar y despachar.</p>
+        </div>
+      </div>
 
       {queuedRequests.length === 0 ? (
         <p className="catalog-empty">No hay pedidos en cola.</p>
       ) : (
         <ul className="restock-list">
           {queuedRequests.map((request) => (
-            <li key={request.id} className="restock-list-item">
+            <li key={request.id} className="restock-list-item card">
               <button
                 type="button"
                 className="restock-list-item-summary"

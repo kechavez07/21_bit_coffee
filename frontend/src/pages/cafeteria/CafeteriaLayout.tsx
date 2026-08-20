@@ -1,6 +1,8 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { signOutUser } from '../../services/firebase/auth'
 import { NotificationsToggle } from '../../components/NotificationsToggle'
+import { ThemeToggle } from '../../components/ThemeToggle'
+import { BrandMark } from '../../components/BrandMark'
 import '../../styles/forms.css'
 import '../../styles/catalog.css'
 import '../../styles/restockRequests.css'
@@ -25,8 +27,12 @@ export function CafeteriaLayout() {
   return (
     <div className="panel-shell">
       <header className="panel-topbar">
-        <span className="panel-brand">21 Bit Coffee</span>
+        <div className="panel-topbar-brand">
+          <BrandMark />
+          <span className="eyebrow panel-topbar-role">Cafetería</span>
+        </div>
         <div className="panel-topbar-actions">
+          <ThemeToggle />
           <NotificationsToggle />
           <button type="button" className="btn btn-secondary" onClick={handleSignOut}>
             Cerrar sesión

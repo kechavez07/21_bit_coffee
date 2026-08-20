@@ -31,8 +31,14 @@ export function DashboardPage() {
 
   return (
     <div className="catalog-page">
-      <h2>Stock de cafetería</h2>
-      <p className="catalog-empty">Vista de solo lectura — pastelería no edita el catálogo.</p>
+      <div className="page-header">
+        <div className="page-header-text">
+          <p className="eyebrow">Producción</p>
+          <h1>Stock de cafetería</h1>
+        </div>
+      </div>
+
+      <p className="notice">Vista de solo lectura — pastelería no edita el catálogo.</p>
 
       {groups.map((group) => {
         const activeProducts = group.products.filter((entry) => entry.product.active)
@@ -46,7 +52,7 @@ export function DashboardPage() {
                 {activeProducts.map(({ product, variants: productVariants }) => {
                   const activeVariants = productVariants.filter((variant) => variant.active)
                   return (
-                    <li key={product.id} className="catalog-product">
+                    <li key={product.id} className="catalog-product card">
                       <div className="catalog-product-header">
                         <span className="catalog-product-name">{product.name}</span>
                       </div>

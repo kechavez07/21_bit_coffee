@@ -86,7 +86,13 @@ export function InboxPage() {
 
   return (
     <div className="restock-page">
-      <h2>Solicitudes</h2>
+      <div className="page-header">
+        <div className="page-header-text">
+          <p className="eyebrow">Producción</p>
+          <h1>Solicitudes</h1>
+          <p>Pedidos pendientes de cafetería, para aceptar o rechazar.</p>
+        </div>
+      </div>
 
       {actionError && <p className="form-error">{actionError}</p>}
 
@@ -95,7 +101,7 @@ export function InboxPage() {
       ) : (
         <ul className="restock-list">
           {pendingRequests.map((request) => (
-            <li key={request.id} className="restock-list-item">
+            <li key={request.id} className="restock-list-item card">
               <button
                 type="button"
                 className="restock-list-item-summary"
@@ -170,7 +176,7 @@ function RecentResolvedItem({ request, uid }: { request: RestockRequest; uid: st
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <li className="restock-list-item">
+    <li className="restock-list-item card">
       <button type="button" className="restock-list-item-summary" onClick={() => setExpanded((v) => !v)}>
         <span className="restock-list-item-title">
           {request.items.length} producto(s) — {STATUS_LABELS[request.status]}

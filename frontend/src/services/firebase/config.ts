@@ -6,12 +6,29 @@
  * expected keys and copy it to `.env` (gitignored) with real values.
  *
  * Emulator opt-in (Phase 3): when `VITE_USE_FIREBASE_EMULATOR === 'true'`,
- * Auth/Firestore/Functions are pointed at the local Firebase emulator
- * suite instead of the real `bit-coffee-668f6` project, so the catalog
- * screens can be exercised end to end without writing to production. Ports
- * below match `backend/firebase.json`. Off by default — omitting the flag
- * (or setting it to anything other than `'true'`) keeps the previous
- * behavior unchanged.
+ * Auth/Firestore are pointed at the local Firebase emulator suite instead
+ * of the real `bit-coffee-668f6` project, so the catalog screens can be
+ * exercised end to end without writing to production. Ports below match
+ * `backend/firebase.json`. Off by default — omitting the flag (or setting
+ * it to anything other than `'true'`) keeps the previous behavior
+ * unchanged.
+ *
+ * `restock_requests` mutations AND `deleteVariant` (catalog hard-delete
+ * guard) go through the Express server (`VITE_API_URL`, see
+ * `services/firebase/apiClient.ts`) instead of Cloud Functions callables —
+ * the Firebase project can't activate the Blaze plan Cloud Functions
+ * requires (see `README_MIGRACION.md`), so `backend/functions/` is kept
+ * only as an untouched backup. The Functions SDK (`firebase/functions`) is
+ * therefore NOT used anywhere in this app — don't reintroduce it for a new
+ * server-side operation; add an Express route instead (see
+ * `backend/server/src/routes/`).
+ *
+ * Firestore emulator port is 8090, not the Firebase CLI default of 8080 —
+ * on this machine 8080 is permanently held by a Windows system service
+ * (`iphlpsvc`, hosted under `svchost.exe`), confirmed via `netstat -ano`.
+ * That's not a leftover emulator process to kill; moving the emulator off
+ * 8080 is the stable fix. Keep this in sync with `backend/firebase.json`'s
+ * `emulators.firestore.port` if either changes.
  */
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth'
@@ -20,7 +37,6 @@ import {
   getFirestore,
   type Firestore,
 } from 'firebase/firestore'
-import { connectFunctionsEmulator, getFunctions, type Functions } from 'firebase/functions'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -54,12 +70,10 @@ export const app: FirebaseApp = initializeApp(
 )
 export const auth: Auth = getAuth(app)
 export const db: Firestore = getFirestore(app)
-export const functions: Functions = getFunctions(app)
 
 if (useEmulator) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
-  connectFirestoreEmulator(db, '127.0.0.1', 8080)
-  connectFunctionsEmulator(functions, '127.0.0.1', 5001)
+  connectFirestoreEmulator(db, '127.0.0.1', 8090)
 
   // eslint-disable-next-line no-console
   console.info('[firebase] Using local emulator suite (VITE_USE_FIREBASE_EMULATOR=true).')

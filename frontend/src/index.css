@@ -1,24 +1,190 @@
+/**
+ * Design tokens + global base styles.
+ *
+ * Palette: 21 Bit Coffee brand — warm-cream light theme, forest-green
+ * accent, gold secondary. Two themes now, not one: the light values below
+ * live on bare `:root`; `:root[data-theme='dark']` (further down this file)
+ * redefines the same variable names for dark mode. Nothing outside this
+ * file ever branches on theme — every other stylesheet just reads
+ * `var(--color-*)` and gets whichever theme is active. The attribute itself
+ * is only ever set by `components/ThemeProvider.tsx` (plus a tiny inline
+ * script in `index.html` that applies a saved choice before first paint, so
+ * there's no light-theme flash on load) — toggled via `ThemeToggle`.
+ * `--color-danger` exists for genuine alerts (form errors, low-stock
+ * warnings, the one terminal-negative status) — used sparingly, never as a
+ * second "brand" color. `--color-success`/`--color-warning` are defined as
+ * primitives for future use but nothing currently reads them — no existing
+ * UI state was reassigned away from `--color-danger` as part of this
+ * palette migration (that's a semantics decision, not a token-value swap).
+ * `--color-surface-2` is a second, slightly deeper surface tier (e.g. the
+ * `.tabs` track sitting a shade back from the white `.tab.active` segment
+ * that pops on top of it) — distinct from `--color-surface-hover`, which is
+ * a transient :hover state, not a resting tier.
+ *
+ * Every other stylesheet in `styles/` and `components/` consumes these
+ * variables — change the look of the whole app from here.
+ */
 :root {
-  --coffee-bg: #6f4e37;
-  --coffee-band: #c8a27a;
-  --text: #2b2118;
-  --bg: #fdfaf6;
+  /* ---- Color ---- */
+  --color-bg: #f5eee0;
+  --color-surface: #ffffff;
+  --color-surface-2: #ede2d0;
+  --color-surface-hover: #e4d6bc;
+  --color-border: #d8c9ae;
+  --color-border-strong: #c7b393;
 
-  font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  --color-ink: #3b2a1d;
+  --color-ink-secondary: #6b5a48;
+  --color-ink-tertiary: #9c8a75;
+  --color-ink-on-accent: #ffffff;
+
+  --color-accent: #46523a;
+  --color-accent-hover: #3a4530;
+  --color-accent-soft: #e1e6d9;
+  --color-accent-soft-ink: #3a4530;
+
+  /* Secondary brand accent — highlights/"premium" marks (`.badge-gold`),
+     never the primary interactive color. Kept as its own token family
+     rather than overloading `--color-accent`, since a screen could
+     plausibly want both at once (e.g. a primary button next to a gold
+     "destacado" badge). */
+  --color-gold: #b08d52;
+  --color-gold-soft: #f3e8d2;
+  --color-gold-soft-ink: #8a6a2f;
+
+  --color-danger: #c24a3d;
+  --color-danger-hover: #ac3f33;
+  --color-danger-soft: #f6dcd6;
+  --color-danger-soft-ink: #7a2e24;
+
+  /* Deliberate alias, not a coincidence: in this palette "success" IS the
+     brand accent (forest green already reads as "good/positive"), so it
+     tracks --color-accent's four values exactly rather than duplicating
+     them — change the accent and success follows automatically. */
+  --color-success: var(--color-accent);
+  --color-success-hover: var(--color-accent-hover);
+  --color-success-soft: var(--color-accent-soft);
+  --color-success-soft-ink: var(--color-accent-soft-ink);
+
+  --color-warning: #a67c3d;
+  --color-warning-hover: #8f6a34;
+  --color-warning-soft: #f3e4c8;
+  --color-warning-soft-ink: #6b4f26;
+
+  /* ---- Typography ----
+   * Two-voice pairing: `--font-serif` is the brand voice (wordmark, page
+   * titles, big numbers) — an elegant editorial serif, echoing the
+   * bakery's own signage/menu type. `--font-sans` stays the workhorse for
+   * every control, label, table and data-dense screen. System stacks only
+   * — no webfont fetch, so it stays fast and works offline as a PWA.
+   */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+
+  --tracking-eyebrow: 0.09em;
+
+  --text-3xl: 2.25rem;
+  --text-2xl: 1.75rem;
+  --text-xl: 1.375rem;
+  --text-lg: 1.0625rem;
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.8125rem;
+  --text-2xs: 0.75rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+
+  /* ---- Spacing (4px base) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-full: 999px;
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 2px rgba(59, 42, 29, 0.06);
+  --shadow-md: 0 4px 12px rgba(59, 42, 29, 0.1);
+  --shadow-focus: 0 0 0 3px var(--color-accent-soft);
+
+  font: 400 16px/1.5 var(--font-sans);
+  color-scheme: light;
+  color: var(--color-ink);
+  background: var(--color-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #f3ede4;
-    --bg: #1c1712;
-  }
+/* ---- Dark theme ----
+ * Same hues as the light palette (forest green accent, gold secondary),
+ * re-lightened/desaturated for a dark ground rather than inverted
+ * mechanically — soft-ink values are brighter tints (readable text on a
+ * dark soft-fill chip), not darker ones. `--color-success` stays aliased to
+ * `--color-accent` here too, same reasoning as the light block above.
+ */
+:root[data-theme='dark'] {
+  --color-bg: #1c1912;
+  --color-surface: #262218;
+  --color-surface-2: #2f2a1e;
+  --color-surface-hover: #3a3426;
+  --color-border: #3a3426;
+  --color-border-strong: #4a4331;
+
+  --color-ink: #f0e9db;
+  --color-ink-secondary: #b8ac97;
+  --color-ink-tertiary: #8a8070;
+  --color-ink-on-accent: #ffffff;
+
+  --color-accent: #7c9268;
+  --color-accent-hover: #8fa87a;
+  --color-accent-soft: rgba(124, 146, 104, 0.16);
+  --color-accent-soft-ink: #a3bd8f;
+
+  --color-gold: #cba968;
+  --color-gold-soft: rgba(203, 169, 104, 0.16);
+  --color-gold-soft-ink: #d9bc86;
+
+  --color-danger: #e08072;
+  --color-danger-hover: #e89388;
+  --color-danger-soft: rgba(224, 128, 114, 0.16);
+  --color-danger-soft-ink: #ef9a8e;
+
+  --color-success: var(--color-accent);
+  --color-success-hover: var(--color-accent-hover);
+  --color-success-soft: var(--color-accent-soft);
+  --color-success-soft-ink: var(--color-accent-soft-ink);
+
+  --color-warning: #d1a34f;
+  --color-warning-hover: #ddb567;
+  --color-warning-soft: rgba(209, 163, 79, 0.16);
+  --color-warning-soft-ink: #e4c07f;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -27,4 +193,199 @@ body {
 
 #root {
   min-height: 100svh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+}
+
+h1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+h2 {
+  font-size: var(--text-xl);
+}
+
+h3 {
+  font-size: var(--text-lg);
+}
+
+h4 {
+  font-size: var(--text-base);
+}
+
+p {
+  line-height: var(--leading-normal);
+}
+
+a {
+  color: var(--color-accent);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
+}
+
+/**
+ * ---- Shared primitives ----
+ * Used across every screen (auth, cafetería, producción) so the app reads
+ * as one system instead of screen-by-screen improvisation.
+ */
+
+/* Small tracked-caps label — "eyebrow" copy above a title, mirrors the
+   bakery's own signage ("NUEVO PRODUCTO", "DESDE FRANCIA…"). */
+.eyebrow {
+  display: inline-block;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-accent-soft-ink);
+}
+
+/* Brand mark: circular "21" seal + wordmark, used in topbars and the auth
+   card. No image asset exists yet — built from CSS so it never 404s and
+   stays crisp at any size. */
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-ink);
+}
+
+.brand-mark-seal {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  line-height: 1;
+}
+
+.brand-mark-word {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-mark-word strong {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.brand-mark-word span {
+  font-size: 0.625rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ink-secondary);
+}
+
+.brand-mark-lg .brand-mark-seal {
+  width: 56px;
+  height: 56px;
+  font-size: var(--text-xl);
+  border-width: 2px;
+}
+
+.brand-mark-lg .brand-mark-word strong {
+  font-size: var(--text-2xl);
+}
+
+.brand-mark-lg .brand-mark-word span {
+  font-size: var(--text-2xs);
+}
+
+/* Page header: eyebrow + title + optional description, with an actions
+   slot that sits right-aligned on desktop and wraps below on mobile. */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.page-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.page-header-text p {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--text-sm);
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Base surface card — dashboard KPIs, catalog products and restock list
+   items all compose this instead of each redeclaring border+radius+bg. */
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Visually hidden but still announced by screen readers — for labels that
+   are redundant once a visible placeholder/icon carries the same meaning
+   (e.g. the catalog search box). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Informational banner — distinct from an *empty* state (e.g. "read-only"
+   notices), so the two convey different meanings even though both are
+   quiet, low-emphasis copy. */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
+  font-size: var(--text-sm);
 }

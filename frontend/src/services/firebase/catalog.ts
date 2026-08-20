@@ -17,22 +17,38 @@
  * Mixing the two field sets in one write is rejected by Firestore, full
  * stop — this isn't a style preference, it's how the rules are shaped.
  *
- * "Delete" = soft delete (`active: false`) via the same update functions.
- * Firestore rules have `allow delete: if false` for both collections —
- * variants/products are referenced by sales/merma/restock_requests, so
- * there is no real delete path.
+ * "Desactivar" = soft delete (`active: false`) via the same update
+ * functions. Firestore rules have `allow delete: if false` for both
+ * `products` and `variants` unconditionally — a variant/product can be
+ * referenced by `sales`/`merma`/`restock_requests`, so a direct client
+ * delete can never be verified safe from a security rule alone.
+ *
+ * A real hard delete DOES exist for variants with zero history, but it
+ * deliberately does not go through this module's usual `updateDoc`/
+ * `addDoc` pattern — `deleteVariant` below calls the Express server
+ * (`backend/server/src/lib/catalog.js`, see `./apiClient.ts`) which runs
+ * the cross-collection history check server-side with the Admin SDK and
+ * only then performs the real `.delete()`. `checkVariantHasHistory` is a
+ * client-side *optimistic* mirror of that same check, used only to skip a
+ * confirmation dialog that's certain to fail — the server re-validates
+ * everything itself and is the only source of truth.
  */
 import {
   addDoc,
   collection,
   doc,
+  getDocs,
+  limit,
   onSnapshot,
+  query,
   serverTimestamp,
   updateDoc,
+  where,
   type FirestoreError,
   type Unsubscribe,
 } from 'firebase/firestore'
 import { db } from './config'
+import { callApi } from './apiClient'
 
 export type ProductCategory = 'galletas' | 'panaderia' | 'reposteria'
 
@@ -63,6 +79,9 @@ export interface Variant {
 
 const PRODUCTS_COLLECTION = 'products'
 const VARIANTS_COLLECTION = 'variants'
+const SALES_COLLECTION = 'sales'
+const MERMA_COLLECTION = 'merma'
+const REQUESTS_COLLECTION = 'restock_requests'
 
 /**
  * Subscribes to every `products` doc (no `active` filter — the UI decides
@@ -209,4 +228,80 @@ export async function adjustVariantStock(id: string, stock: number, uid: string)
     updatedAt: serverTimestamp(),
     updatedBy: uid,
   })
+}
+
+/**
+ * Client-side optimistic mirror of the check `deleteVariant` (the Cloud
+ * Function) performs server-side: does this variant show up in `sales`,
+ * `merma`, or any `restock_requests.items[]`?
+ *
+ * `restock_requests` is readable by any signed-in user, per
+ * `backend/firestore.rules`. `sales`/`merma`, however, currently have NO
+ * client rule at all — they fall through to the collection's deny-all
+ * fallback (see the rules file's own H-02 note: those two collections'
+ * rules are tracked separately and are deliberately out of scope for the
+ * pass that added `products`/`variants`/`restock_requests` rules).
+ * Confirmed empirically against the emulator: a query against either
+ * throws `permission-denied` for every signed-in user, cafetería included.
+ * Each of the two queries below is therefore wrapped to swallow exactly
+ * that error and treat it as "inconclusive" rather than letting it reject
+ * the whole check — this function is explicitly UX-only (skip opening a
+ * confirmation dialog that's certain to be rejected), NOT the authority on
+ * whether the delete will succeed, so degrading gracefully here instead of
+ * throwing is consistent with that: the callable still runs the real
+ * `sales`/`merma` check itself with the Admin SDK (which always bypasses
+ * rules) and is the only source of truth, same as any other race between
+ * this check and the confirm click.
+ */
+export async function checkVariantHasHistory(variantId: string): Promise<boolean> {
+  const [salesSnap, mermaSnap] = await Promise.all([
+    queryHistoryCollection(SALES_COLLECTION, variantId),
+    queryHistoryCollection(MERMA_COLLECTION, variantId),
+  ])
+  if (salesSnap === true || mermaSnap === true) {
+    return true
+  }
+
+  // Same posture as the callable: no index-friendly way to query inside
+  // `items[]` for an exact `variantId` match, so read the whole (low
+  // volume) collection and check in memory.
+  const requestsSnap = await getDocs(collection(db, REQUESTS_COLLECTION))
+  return requestsSnap.docs.some((docSnap) => {
+    const items = docSnap.data().items
+    return Array.isArray(items) && items.some((item) => item?.variantId === variantId)
+  })
+}
+
+/**
+ * `true` if `collectionName` has a doc referencing `variantId`, `false` if
+ * not — or if the read itself was denied (see this function's only
+ * caller's header comment for why that's swallowed rather than thrown).
+ */
+async function queryHistoryCollection(collectionName: string, variantId: string): Promise<boolean> {
+  try {
+    const snap = await getDocs(
+      query(collection(db, collectionName), where('variantId', '==', variantId), limit(1)),
+    )
+    return !snap.empty
+  } catch (err) {
+    if (isPermissionDenied(err)) {
+      return false
+    }
+    throw err
+  }
+}
+
+function isPermissionDenied(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && err.code === 'permission-denied'
+}
+
+/**
+ * Hard-deletes a variant with zero history. Calls the Express server's
+ * `deleteVariant` route (`backend/server/src/lib/catalog.js`) via
+ * `callApi` — errors come back with a Spanish `.message` meant to be shown
+ * as-is, same posture as `services/firebase/restockRequests.ts`'s callers
+ * (no parallel error-mapping table here either).
+ */
+export async function deleteVariant(variantId: string): Promise<void> {
+  await callApi<{ deleted: boolean }>('deleteVariant', { variantId })
 }

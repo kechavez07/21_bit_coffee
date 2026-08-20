@@ -109,6 +109,7 @@ export function DispatchForm({ request, submitting, error, onSubmit, onCancel }:
                 step={1}
                 value={row.dispatchedQty}
                 onChange={(e) => updateRow(row.variantId, { dispatchedQty: e.target.value })}
+                onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
 
