@@ -4,8 +4,10 @@
  * to know these are two separate collections.
  *
  * Same shape/posture as `useCatalog`: `loading` stays `true` until *both*
- * listeners have delivered their first snapshot, `error` is the first
- * Firestore error from either (whichever fires first).
+ * listeners have delivered their first response (success or error — an
+ * error still counts as "done loading", see `useCatalog`'s comment for
+ * why that distinction matters), `error` is the first Firestore error
+ * from either (whichever fires first).
  */
 import { useEffect, useState } from 'react'
 import type { FirestoreError } from 'firebase/firestore'
@@ -58,7 +60,10 @@ export function useMovements(limitCount = 50): UseMovementsResult {
         setSales(next)
         setSalesLoaded(true)
       },
-      (err) => setError((current) => current ?? err),
+      (err) => {
+        setError((current) => current ?? err)
+        setSalesLoaded(true)
+      },
       limitCount,
     )
 
@@ -67,7 +72,10 @@ export function useMovements(limitCount = 50): UseMovementsResult {
         setWaste(next)
         setWasteLoaded(true)
       },
-      (err) => setError((current) => current ?? err),
+      (err) => {
+        setError((current) => current ?? err)
+        setWasteLoaded(true)
+      },
       limitCount,
     )
 

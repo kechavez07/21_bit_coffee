@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: 21-bit-coffee-api
+    runtime: node
+    rootDir: backend/server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      # Render does NOT set this automatically (confirmed — unlike some
+      # other PaaS, it leaves NODE_ENV unset unless you set it). Required
+      # for src/lib/cors.js's dev-only "allow any localhost port" rule to
+      # actually stay off in production — without this, NODE_ENV would be
+      # undefined here too, same as local dev, and the rule would apply.
+      - key: NODE_ENV
+        value: production
+      # Non-secret — same value already used by the frontend's
+      # VITE_FIREBASE_PROJECT_ID (see frontend/.env).
+      - key: FIREBASE_PROJECT_ID
+        value: bit-coffee-668f6
+      # Secrets — set manually in the Render dashboard, never here.
+      # See README_MIGRACION.md for exactly what to paste.
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: ALLOWED_ORIGIN
+        sync: false

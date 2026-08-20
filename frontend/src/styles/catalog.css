@@ -37,6 +37,7 @@
   padding-left: var(--space-3);
   border-left: 1px solid var(--color-border);
   white-space: nowrap;
+
 }
 
 .panel-topbar-actions {
@@ -178,6 +179,7 @@
   font-size: var(--text-sm);
   color: var(--color-ink-secondary);
   cursor: pointer;
+
 }
 
 /* ---- Category chips + search (toolbar above the accordion) ---- */
@@ -224,6 +226,7 @@
   color: var(--color-ink-on-accent);
 }
 
+
 .catalog-chip-count {
   font-variant-numeric: tabular-nums;
   font-size: var(--text-2xs);
@@ -246,6 +249,7 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+
 
 .catalog-category summary {
   list-style: none;
@@ -295,6 +299,7 @@
 
 .catalog-category > *:not(summary) {
   margin-top: var(--space-3);
+
 }
 
 .catalog-empty {
@@ -412,6 +417,7 @@
   font-size: var(--text-xs);
 }
 
+
 .stock-stepper {
   display: inline-flex;
   align-items: stretch;
@@ -460,6 +466,7 @@
 .stock-stepper-input::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
+
 }
 
 .catalog-panel {
@@ -534,4 +541,5 @@
 .badge-gold {
   background: var(--color-gold-soft);
   color: var(--color-gold-soft-ink);
+
 }

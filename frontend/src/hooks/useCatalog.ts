@@ -7,9 +7,12 @@
  * own pair of listeners.
  *
  * `loading` stays `true` until *both* collections have delivered their
- * first snapshot. `error` is the first Firestore error from either
- * listener (whichever fires first) — good enough for a single "something
- * went wrong loading the catalog" banner.
+ * first response — a success snapshot OR an error, either one counts as
+ * "no longer loading" (a permission-denied listener that never emits a
+ * snapshot must not leave the UI stuck on a spinner forever). `error` is
+ * the first Firestore error from either listener (whichever fires first)
+ * — good enough for a single "something went wrong loading the catalog"
+ * banner.
  */
 import { useEffect, useState } from 'react'
 import type { FirestoreError } from 'firebase/firestore'
@@ -40,7 +43,10 @@ export function useCatalog(): UseCatalogResult {
         setProducts(next)
         setProductsLoaded(true)
       },
-      (err) => setError((current) => current ?? err),
+      (err) => {
+        setError((current) => current ?? err)
+        setProductsLoaded(true)
+      },
     )
 
     const unsubscribeVariants = subscribeToVariants(
@@ -48,7 +54,10 @@ export function useCatalog(): UseCatalogResult {
         setVariants(next)
         setVariantsLoaded(true)
       },
-      (err) => setError((current) => current ?? err),
+      (err) => {
+        setError((current) => current ?? err)
+        setVariantsLoaded(true)
+      },
     )
 
     return () => {

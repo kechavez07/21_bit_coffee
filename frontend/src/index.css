@@ -1,31 +1,13 @@
 /**
  * Design tokens + global base styles.
  *
- * Palette: 21 Bit Coffee brand — warm-cream light theme, forest-green
- * accent, gold secondary. Two themes now, not one: the light values below
- * live on bare `:root`; `:root[data-theme='dark']` (further down this file)
- * redefines the same variable names for dark mode. Nothing outside this
- * file ever branches on theme — every other stylesheet just reads
- * `var(--color-*)` and gets whichever theme is active. The attribute itself
- * is only ever set by `components/ThemeProvider.tsx` (plus a tiny inline
- * script in `index.html` that applies a saved choice before first paint, so
- * there's no light-theme flash on load) — toggled via `ThemeToggle`.
- * `--color-danger` exists for genuine alerts (form errors, low-stock
- * warnings, the one terminal-negative status) — used sparingly, never as a
- * second "brand" color. `--color-success`/`--color-warning` are defined as
- * primitives for future use but nothing currently reads them — no existing
- * UI state was reassigned away from `--color-danger` as part of this
- * palette migration (that's a semantics decision, not a token-value swap).
- * `--color-surface-2` is a second, slightly deeper surface tier (e.g. the
- * `.tabs` track sitting a shade back from the white `.tab.active` segment
- * that pops on top of it) — distinct from `--color-surface-hover`, which is
- * a transient :hover state, not a resting tier.
  *
  * Every other stylesheet in `styles/` and `components/` consumes these
  * variables — change the look of the whole app from here.
  */
 :root {
   /* ---- Color ---- */
+
   --color-bg: #f5eee0;
   --color-surface: #ffffff;
   --color-surface-2: #ede2d0;
@@ -85,6 +67,7 @@
   --tracking-eyebrow: 0.09em;
 
   --text-3xl: 2.25rem;
+
   --text-2xl: 1.75rem;
   --text-xl: 1.375rem;
   --text-lg: 1.0625rem;
@@ -117,12 +100,14 @@
   --radius-full: 999px;
 
   /* ---- Shadow ---- */
+
   --shadow-sm: 0 1px 2px rgba(59, 42, 29, 0.06);
   --shadow-md: 0 4px 12px rgba(59, 42, 29, 0.1);
   --shadow-focus: 0 0 0 3px var(--color-accent-soft);
 
   font: 400 16px/1.5 var(--font-sans);
   color-scheme: light;
+
   color: var(--color-ink);
   background: var(--color-bg);
   font-synthesis: none;
@@ -130,6 +115,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 
 /* ---- Dark theme ----
  * Same hues as the light palette (forest green accent, gold secondary),
@@ -185,6 +171,13 @@
 *::before,
 *::after {
   box-sizing: border-box;
+
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -211,6 +204,7 @@ h1 {
   font-size: var(--text-2xl);
   font-weight: 700;
   letter-spacing: 0;
+
 }
 
 h2 {
@@ -389,3 +383,4 @@ a:hover {
   color: var(--color-accent-soft-ink);
   font-size: var(--text-sm);
 }
+

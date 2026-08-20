@@ -1,0 +1,21 @@
+{
+  "name": "21-bit-coffee-server",
+  "description": "Express API for the restock_requests lifecycle — replaces backend/functions/ (Cloud Functions) because the Firebase project can't activate the Blaze plan. Firestore/Auth/FCM stay on Firebase; this is only the compute layer, meant to run on Render.",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.6.0"
+  }
+}

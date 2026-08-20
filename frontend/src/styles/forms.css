@@ -1,7 +1,9 @@
 /**
+
  * Shared visual language for card-style forms (login) and every control
  * (buttons, inputs, tabs) reused everywhere else. Plain CSS, no framework —
  * kept intentionally small. Tokens come from `index.css`.
+
  */
 .auth-page {
   position: relative;
@@ -46,6 +48,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+
 }
 
 /* `.eyebrow` is `display: inline-block` (its base rule, shared with
@@ -54,6 +57,7 @@
    text within the box, not the box itself in `.auth-card`'s flex column. */
 .auth-card .eyebrow {
   align-self: center;
+
 }
 
 .auth-card h1 {
@@ -105,6 +109,7 @@
   font-weight: var(--weight-semibold);
   box-shadow: var(--shadow-sm);
 }
+
 
 /* ---- Fields ---- */
 
@@ -168,6 +173,7 @@
 
 .field-password-toggle:hover {
   color: var(--color-accent);
+
 }
 
 .field input:focus-visible,
@@ -207,6 +213,7 @@
   background: var(--color-accent);
   color: var(--color-ink-on-accent);
   font-weight: var(--weight-medium);
+
 }
 
 .btn-primary:hover:not(:disabled) {

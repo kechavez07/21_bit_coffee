@@ -1,0 +1,12 @@
+{
+  "name": "21-bit-coffee-backend-tests",
+  "private": true,
+  "description": "Firestore security rules tests — separate from functions/ (not deployed, not a Cloud Functions codebase). Requires the Firestore emulator already running on 127.0.0.1:8090 (see ../firebase.json).",
+  "type": "commonjs",
+  "scripts": {
+    "test:rules": "node --test tests/firestore.rules.test.js"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1"
+  }
+}

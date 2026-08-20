@@ -1,23 +1,28 @@
 /**
- * Phase 4 — sale/waste registration screen. `forms.css`/`catalog.css` still
- * own every input control, button, badge, and the `.catalog-panel` form
- * shell (reused as-is for the registration form here) — this file only adds
- * the type-toggle and history-list layout that didn't exist before this
- * phase.
+ * Sale/waste registration screen. `forms.css`/`catalog.css` still own
+ * every input control, button, badge base, and the `.catalog-panel` form
+ * shell (reused as-is for the registration form here) — this file only
+ * adds the type-toggle and history-list layout.
  */
 
 .movements-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .movements-type-toggle {
   max-width: 280px;
 }
 
+.movements-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .movements-history h3 {
-  margin: 0 0 12px;
+  margin: 0;
 }
 
 .movements-list {
@@ -26,48 +31,55 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .movements-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--text) 4%, transparent);
-  font-size: 14px;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
 }
 
 .movements-row-name {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   flex: 1;
   min-width: 140px;
 }
 
 .movements-row-quantity {
-  opacity: 0.9;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .movements-row-reason {
-  opacity: 0.75;
-  font-size: 13px;
+  color: var(--color-ink-secondary);
+  font-size: var(--text-xs);
   font-style: italic;
 }
 
 .movements-row-registered-by,
 .movements-row-meta {
-  opacity: 0.7;
-  font-size: 13px;
+  color: var(--color-ink-tertiary);
+  font-size: var(--text-xs);
 }
 
+/*
+ * Sale/waste both stay inside the blue+neutral system — no green/red
+ * pair. "Venta" gets the accent (the primary, revenue-positive action);
+ * "Merma" stays neutral (routine loss-tracking, not an alert — genuine
+ * alerts, like low stock, use --color-danger elsewhere).
+ */
 .badge-sale {
-  background: #2e7d32;
-  color: #fff;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-ink);
 }
 
 .badge-waste {
-  background: #b3261e;
-  color: #fff;
+  background: var(--color-surface-hover);
+  color: var(--color-ink-secondary);
 }
