@@ -31,42 +31,9 @@ import {
   type FirestoreError,
   type Unsubscribe,
 } from 'firebase/firestore'
-
 import { db } from './config'
 import { callApi } from './apiClient'
 import type { UserRole } from './auth'
-
-/**
- * POSTs `payload` to `${VITE_API_URL}/{path}` with the current user's ID
- * token, and returns the parsed JSON body on success. Throws a plain
- * `Error` (message = the server's Spanish message) on any non-2xx
- * response, matching the shape `RequestsPage`/`QueuePage` already expect
- * from `catch (err) { err instanceof Error ? err.message : ... }`.
- */
-async function callApi<TResult>(path: string, payload: unknown): Promise<TResult> {
-  const user = auth.currentUser
-  if (!user) {
-    throw new Error('Debes iniciar sesión para hacer esto.')
-  }
-  const idToken = await user.getIdToken()
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify(payload),
-  })
-
-  const body = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    throw new Error(body?.error?.message ?? 'Ocurrió un error inesperado. Intenta de nuevo.')
-  }
-
-  return body as TResult
-}
 
 const REQUESTS_COLLECTION = 'restock_requests'
 
