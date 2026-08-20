@@ -18,8 +18,8 @@ export default defineConfig({
         short_name: '21 Bit Coffee',
         description:
           'Cafeteria/Production inventory management: sales, waste, stock and restock requests.',
-        theme_color: '#6F4E37',
-        background_color: '#FDFAF6',
+        theme_color: '#F5EEE0',
+        background_color: '#F5EEE0',
         display: 'standalone',
         start_url: '/',
         scope: '/',

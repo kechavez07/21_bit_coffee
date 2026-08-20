@@ -11,6 +11,7 @@ import {
 } from '../../services/firebase/restockRequests'
 import { RestockRequestDetail } from '../../components/RestockRequestDetail'
 import { FullScreenStatus } from '../../components/FullScreenStatus'
+import { useToast } from '../../hooks/useToast'
 import { RequestItemsForm, type WorkingItem } from './components/RequestItemsForm'
 import { STATUS_LABELS } from '../../utils/restockRequests'
 import '../../styles/restockRequests.css'
@@ -27,6 +28,7 @@ type FormTarget = { kind: 'new' } | { kind: 'edit'; request: RestockRequest } | 
  */
 export function RequestsPage() {
   const { user } = useAuth()
+  const { showToast } = useToast()
   const { products, variants, loading: catalogLoading, error: catalogError } = useCatalog()
   const { requests, loading: requestsLoading, error: requestsError } = useRestockRequests()
 
@@ -83,6 +85,7 @@ export function RequestsPage() {
     setActionError(null)
     try {
       await confirmReceipt(request.id)
+      showToast('success', 'Recepción confirmada.')
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'No se pudo confirmar la recepción.')
     }
@@ -108,19 +111,25 @@ export function RequestsPage() {
 
   return (
     <div className="restock-page">
-      <div className="restock-toolbar">
-        <h2>Pedidos</h2>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => {
-            setFormTarget({ kind: 'new' })
-            setFormError(null)
-            setExpandedId(null)
-          }}
-        >
-          + Nuevo pedido
-        </button>
+      <div className="page-header">
+        <div className="page-header-text">
+          <p className="eyebrow">Cafetería</p>
+          <h1>Pedidos</h1>
+          <p>Solicita reabastecimiento y revisa el estado de tus pedidos.</p>
+        </div>
+        <div className="page-header-actions">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              setFormTarget({ kind: 'new' })
+              setFormError(null)
+              setExpandedId(null)
+            }}
+          >
+            + Nuevo pedido
+          </button>
+        </div>
       </div>
 
       {formTarget?.kind === 'new' && (
@@ -143,7 +152,7 @@ export function RequestsPage() {
       ) : (
         <ul className="restock-list">
           {ownRequests.map((request) => (
-            <li key={request.id} className="restock-list-item">
+            <li key={request.id} className="restock-list-item card">
               <button
                 type="button"
                 className="restock-list-item-summary"

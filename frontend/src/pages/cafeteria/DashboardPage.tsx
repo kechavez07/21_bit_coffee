@@ -41,12 +41,20 @@ export function DashboardPage() {
 
   return (
     <div className="dashboard-page">
+      <div className="page-header">
+        <div className="page-header-text">
+          <p className="eyebrow">Cafetería</p>
+          <h1>Dashboard</h1>
+          <p>Estado del catálogo en tiempo real.</p>
+        </div>
+      </div>
+
       <div className="dashboard-cards">
-        <div className="dashboard-card">
+        <div className="dashboard-card card">
           <span className="dashboard-card-value">{activeProducts.length}</span>
           <span className="dashboard-card-label">Productos activos</span>
         </div>
-        <div className="dashboard-card dashboard-card-warning">
+        <div className="dashboard-card card dashboard-card-warning">
           <span className="dashboard-card-value">{lowStockVariants.length}</span>
           <span className="dashboard-card-label">Variantes con stock bajo</span>
         </div>
@@ -55,7 +63,7 @@ export function DashboardPage() {
       <section>
         <h2>Stock bajo</h2>
         {lowStockVariants.length === 0 ? (
-          <p>No hay variantes con stock bajo por ahora.</p>
+          <p className="catalog-empty">No hay variantes con stock bajo por ahora.</p>
         ) : (
           <ul className="low-stock-list">
             {lowStockVariants.map(({ variant, product }) => (
@@ -72,7 +80,7 @@ export function DashboardPage() {
           </ul>
         )}
         <p>
-          <Link to="/cafeteria/catalogo">Ir al catálogo</Link>
+          <Link to="/cafeteria/catalogo">Ir al catálogo →</Link>
         </p>
       </section>
     </div>

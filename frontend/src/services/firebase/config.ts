@@ -13,10 +13,15 @@
  * it to anything other than `'true'`) keeps the previous behavior
  * unchanged.
  *
- * There is no Functions SDK here — `restock_requests` mutations go through
- * the Express server (`VITE_API_URL`, see
- * `services/firebase/restockRequests.ts`) instead of Cloud Functions
- * callables, since the project migrated off Blaze-only Cloud Functions.
+ * `restock_requests` mutations AND `deleteVariant` (catalog hard-delete
+ * guard) go through the Express server (`VITE_API_URL`, see
+ * `services/firebase/apiClient.ts`) instead of Cloud Functions callables —
+ * the Firebase project can't activate the Blaze plan Cloud Functions
+ * requires (see `README_MIGRACION.md`), so `backend/functions/` is kept
+ * only as an untouched backup. The Functions SDK (`firebase/functions`) is
+ * therefore NOT used anywhere in this app — don't reintroduce it for a new
+ * server-side operation; add an Express route instead (see
+ * `backend/server/src/routes/`).
  *
  * Firestore emulator port is 8090, not the Firebase CLI default of 8080 —
  * on this machine 8080 is permanently held by a Windows system service

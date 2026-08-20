@@ -3,11 +3,12 @@ import type { FormEvent } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useCatalog } from '../../hooks/useCatalog'
 import { useMovements, type MovementEntry } from '../../hooks/useMovements'
-import { CATEGORY_LABELS, groupCatalogByCategory } from '../../utils/catalog'
 import { mapFirestoreError } from '../../utils/firestoreErrorMessages'
 import { registerSale, registerWaste } from '../../services/firebase/movements'
 import type { Product, Variant } from '../../services/firebase/catalog'
 import { FullScreenStatus } from '../../components/FullScreenStatus'
+import { VariantCombobox } from '../../components/VariantCombobox'
+import { useToast } from '../../hooks/useToast'
 import '../../styles/forms.css'
 import '../../styles/catalog.css'
 import '../../styles/movements.css'
@@ -23,10 +24,10 @@ type MovementType = 'sale' | 'waste'
  */
 export function MovementsPage() {
   const { user } = useAuth()
+  const { showToast } = useToast()
   const { products, variants, loading: catalogLoading, error: catalogError } = useCatalog()
   const { movements, loading: movementsLoading, error: movementsError } = useMovements()
 
-  const groups = useMemo(() => groupCatalogByCategory(products, variants), [products, variants])
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products])
   const variantsById = useMemo(() => new Map(variants.map((v) => [v.id, v])), [variants])
 
@@ -64,11 +65,13 @@ export function MovementsPage() {
     try {
       if (type === 'sale') {
         await registerSale({ variantId, quantity: parsedQuantity }, user.uid)
+        showToast('success', 'Venta registrada.')
       } else {
         await registerWaste(
           { variantId, quantity: parsedQuantity, reason: reason.trim() ? reason.trim() : null },
           user.uid,
         )
+        showToast('success', 'Merma registrada.')
       }
       resetForm()
     } catch (err) {
@@ -94,6 +97,14 @@ export function MovementsPage() {
 
   return (
     <div className="movements-page">
+      <div className="page-header">
+        <div className="page-header-text">
+          <p className="eyebrow">Cafetería</p>
+          <h1>Movimientos</h1>
+          <p>Registra ventas y mermas, y revisa el historial reciente.</p>
+        </div>
+      </div>
+
       <form className="catalog-panel" onSubmit={handleSubmit}>
         <h3>Registrar movimiento</h3>
 
@@ -120,31 +131,14 @@ export function MovementsPage() {
 
         <div className="field">
           <label htmlFor="movement-variant">Variante</label>
-          <select
+          <VariantCombobox
             id="movement-variant"
-            required
+            products={products}
+            variants={variants}
             value={variantId}
-            onChange={(e) => setVariantId(e.target.value)}
-          >
-            <option value="" disabled>
-              Selecciona una variante
-            </option>
-            {groups.map((group) =>
-              group.products.length === 0 ? null : (
-                <optgroup key={group.category} label={CATEGORY_LABELS[group.category]}>
-                  {group.products.flatMap(({ product, variants: productVariants }) =>
-                    productVariants
-                      .filter((variant) => variant.active)
-                      .map((variant) => (
-                        <option key={variant.id} value={variant.id}>
-                          {variantLabel(product, variant)}
-                        </option>
-                      )),
-                  )}
-                </optgroup>
-              ),
-            )}
-          </select>
+            onChange={setVariantId}
+            required
+          />
         </div>
 
         <div className="field">
@@ -157,6 +151,7 @@ export function MovementsPage() {
             required
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
+            onWheel={(e) => e.currentTarget.blur()}
           />
         </div>
 

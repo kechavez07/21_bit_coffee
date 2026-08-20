@@ -32,7 +32,7 @@ export function RoleResolver({ children }: RoleResolverProps) {
   const { role, loading: roleLoading, error } = useUserRole(user)
 
   if (authLoading) {
-    return <FullScreenStatus variant="loading" title="Cargando…" />
+    return <FullScreenStatus variant="loading" title="Cargando…" showBrand />
   }
 
   if (!user) {
@@ -40,7 +40,7 @@ export function RoleResolver({ children }: RoleResolverProps) {
   }
 
   if (roleLoading) {
-    return <FullScreenStatus variant="loading" title="Cargando…" />
+    return <FullScreenStatus variant="loading" title="Cargando…" showBrand />
   }
 
   if (error) {
@@ -49,6 +49,7 @@ export function RoleResolver({ children }: RoleResolverProps) {
         variant="error"
         title="No se pudo verificar tu cuenta"
         description="Ocurrió un problema al cargar tu cuenta. Intenta de nuevo."
+        showBrand
       />
     )
   }

@@ -26,13 +26,18 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.panel-brand {
+.panel-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   flex-shrink: 0;
+}
+
+.panel-topbar-role {
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border);
   white-space: nowrap;
-  font-weight: var(--weight-bold);
-  font-size: var(--text-lg);
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
+
 }
 
 .panel-topbar-actions {
@@ -93,6 +98,8 @@
   flex-wrap: wrap;
 }
 
+/* Structural props (border/radius/bg/shadow) come from `.card` — this
+   class only adds the KPI-specific flex layout and padding. */
 .dashboard-card {
   flex: 1;
   min-width: 150px;
@@ -100,9 +107,6 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
 }
 
 .dashboard-card-warning {
@@ -168,6 +172,18 @@
   gap: var(--space-5);
 }
 
+.catalog-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-ink-secondary);
+  cursor: pointer;
+
+}
+
+/* ---- Category chips + search (toolbar above the accordion) ---- */
+
 .catalog-toolbar {
   display: flex;
   align-items: center;
@@ -176,14 +192,57 @@
   gap: var(--space-3);
 }
 
-.catalog-toggle {
+.catalog-chips {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
-  font-size: var(--text-sm);
+}
+
+.catalog-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  padding: var(--space-1) var(--space-3);
+  min-height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: transparent;
   color: var(--color-ink-secondary);
   cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
+
+.catalog-chip:hover {
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+}
+
+.catalog-chip-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-ink-on-accent);
+}
+
+
+.catalog-chip-count {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-2xs);
+  opacity: 0.75;
+}
+
+.catalog-search {
+  min-width: 220px;
+  flex: 0 1 260px;
+}
+
+.catalog-search input[type='search'] {
+  appearance: none;
+}
+
+/* ---- Category accordion ---- */
 
 .catalog-category {
   display: flex;
@@ -191,16 +250,56 @@
   gap: var(--space-3);
 }
 
-.catalog-category h2 {
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  margin: 0;
+
+.catalog-category summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.catalog-category summary::-webkit-details-marker {
+  display: none;
+}
+
+.catalog-category-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-border);
+}
+
+.catalog-category-chevron {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--color-ink-secondary);
+  border-bottom: 1.5px solid var(--color-ink-secondary);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.catalog-category[open] .catalog-category-chevron {
+  transform: rotate(45deg);
+}
+
+.catalog-category-title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   color: var(--color-ink-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.catalog-category-count {
+  margin-left: auto;
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-tertiary);
+}
+
+.catalog-category > *:not(summary) {
+  margin-top: var(--space-3);
+
 }
 
 .catalog-empty {
@@ -318,15 +417,56 @@
   font-size: var(--text-xs);
 }
 
-.catalog-stock-adjust input {
-  width: 68px;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
+
+.stock-stepper {
+  display: inline-flex;
+  align-items: stretch;
   border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.stock-stepper-btn {
+  flex-shrink: 0;
+  width: 26px;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stock-stepper-btn:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+}
+
+.stock-stepper-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.stock-stepper-input {
+  width: 52px;
+  border: none;
+  border-left: 1px solid var(--color-border-strong);
+  border-right: 1px solid var(--color-border-strong);
+  padding: var(--space-1) var(--space-2);
   background: var(--color-bg);
   color: var(--color-ink);
   font: inherit;
+  text-align: center;
   font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.stock-stepper-input::-webkit-inner-spin-button,
+.stock-stepper-input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+
 }
 
 .catalog-panel {
@@ -347,6 +487,28 @@
 .catalog-panel-actions {
   display: flex;
   gap: var(--space-2);
+}
+
+/* Danger zone — variant hard-delete, inside `VariantForm`'s edit mode only.
+   Visually separated from the catalog-field inputs above it: a tinted
+   background + border in `--color-danger`, kept subtle (not the full-
+   strength badge/button color) since this section is a secondary action
+   sitting inside a form whose primary action is still "Guardar". */
+.catalog-danger-zone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+}
+
+.catalog-danger-zone-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-danger-soft-ink);
 }
 
 /* ---- Badges ---- */
@@ -371,4 +533,13 @@
 .badge-low {
   background: var(--color-danger);
   color: var(--color-ink-on-accent);
+}
+
+/* For a "destacado"/premium mark — not used by any screen yet, defined so
+   it's ready when one needs it (same posture as `--color-warning` before
+   the toast system started reading it). */
+.badge-gold {
+  background: var(--color-gold-soft);
+  color: var(--color-gold-soft-ink);
+
 }

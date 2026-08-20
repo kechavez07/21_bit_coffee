@@ -31,7 +31,9 @@ import {
   type FirestoreError,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { auth, db } from './config'
+
+import { db } from './config'
+import { callApi } from './apiClient'
 import type { UserRole } from './auth'
 
 /**

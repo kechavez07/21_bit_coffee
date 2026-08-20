@@ -4,12 +4,26 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#6F4E37" />
+    <meta name="theme-color" content="#F5EEE0" />
     <meta
       name="description"
       content="21 Bit Coffee — Cafeteria/Production inventory management"
     />
     <title>21 Bit Coffee</title>
+    <script>
+      // Applies a saved dark-mode choice before the stylesheet/app paint,
+      // so there's no flash of the light theme on load. Kept in sync with
+      // `ThemeProvider.tsx`, which is the only other place that reads or
+      // writes this key.
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.dataset.theme = 'dark'
+        }
+      } catch (e) {
+        // localStorage can throw (private browsing, disabled storage) — the
+        // app still works, it just always starts in the light theme then.
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

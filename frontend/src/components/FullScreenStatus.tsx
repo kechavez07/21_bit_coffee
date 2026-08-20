@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { BrandMark } from './BrandMark'
 import './FullScreenStatus.css'
 import '../styles/forms.css'
 
@@ -7,6 +8,10 @@ export interface FullScreenStatusProps {
   title: string
   description?: string
   action?: ReactNode
+  /** Show the brand seal above the title. Only for screens with no panel
+   * topbar of their own (route-guard states) — pages nested inside
+   * `CafeteriaLayout`/`ProductionLayout` already show it there. */
+  showBrand?: boolean
 }
 
 /**
@@ -20,9 +25,11 @@ export function FullScreenStatus({
   title,
   description,
   action,
+  showBrand = false,
 }: FullScreenStatusProps) {
   return (
     <div className="status-screen" role={variant === 'error' ? 'alert' : 'status'}>
+      {showBrand && <BrandMark />}
       {variant === 'loading' && <div className="spinner" aria-hidden="true" />}
       <h1>{title}</h1>
       {description && <p>{description}</p>}
